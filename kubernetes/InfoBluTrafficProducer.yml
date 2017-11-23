@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: infoblu-traffic-producer
+  labels:
+    app: infoblu-traffic-producer
+spec:
+  ports:
+  - port: 9900
+  selector:
+    app: infoblu-traffic-producer
+  clusterIP: None
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: infoblu-traffic-producer-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: infoblu-traffic-producer
+    spec:
+      hostNetwork: false
+      containers:
+      - name: infoblu-traffic-producer
+        image: 10.98.74.120:5000/iot-etl-producers:1.0-SNAPSHOT
+        imagePullPolicy: Always
+        lifecycle:
+          postStart:
+            exec:
+             command: ["/bin/sh", "-c", "cat /etc/extra_hosts >> /etc/hosts"]
+        securityContext:
+          privileged: true
+          runAsUser: 0
+        volumeMounts:
+        - name: glusterfsvol
+          mountPath: /opt/docker/conf/production.conf
+          subPath: infoblu-traffic-producer/conf/production.conf
+          readOnly: true
+        - name: glusterfsvol
+          mountPath: /opt/docker/conf/log4j2.xml
+          subPath: infoblu-traffic-producer/conf/log4j2.xml
+          readOnly: true
+        - name: glusterfsvol
+          mountPath: /opt/docker/conf/daf.keytab
+          subPath: infoblu-traffic-producer/conf/daf.keytab
+          readOnly: true
+        - name: glusterfsvol
+          mountPath: /opt/docker/logs
+          subPath: infoblu-traffic-producer/conf/logs
+        - name: hosts
+          mountPath: /etc/extra_hosts
+        - name: krb5conf
+          mountPath: /etc/krb5.conf
+      imagePullSecrets:
+        - name: regsecret
+      volumes:
+      - name: glusterfsvol
+        persistentVolumeClaim:
+          claimName: gluster-claim
+      - name: hosts
+        hostPath:
+          path: /etc/hosts
+      - name: krb5conf
+        hostPath:
+          path: /etc/krb5.conf
+

@@ -1,0 +1,28 @@
+daf-event-producers {
+
+  args{
+    producerName = "yourProducerName"
+    period = 120
+  }
+
+  kafka {
+    topic = "daf-iot-events"
+    bootstrapServers = "192.168.0.20:9092,192.168.0.21:9092,192.168.0.27:9092"
+    zookeeperServers = "192.168.0.23:2181/kafka"
+    bootstrapServers_ = "localhost:9092"
+    zookeeperServers_ = "localhost:2181"
+    serializer = "org.apache.kafka.common.serialization.ByteArraySerializer"
+    deserializer = "org.apache.kafka.common.serialization.ByteArrayDeserializer"
+  }
+
+  urls {
+    infobluEvents = "http://159.122.135.24/daf/test/traffic_events?token=yourToken"
+    infobluTraffic = "http://services.infoblu.it/BITW/data?id=yourId"
+    torinoTraffic = "http://opendata.5t.torino.it/get_fdt"
+    torinoParking = "http://opendata.5t.torino.it/get_pk"
+  }
+
+  hosts {
+    torinoHost = "http://opendata.5t.torino.it"
+  }
+}

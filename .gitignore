@@ -1,0 +1,6 @@
+*.db
+assembly
+target/
+.idea
+*.conf
+*.csv
