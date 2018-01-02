@@ -111,7 +111,6 @@ class TorinoParkingConverter extends EventConverter {
 object TorinoParkingConverter {
 
   val url = ConfigFactory.load().getString("daf-event-producers.urls.torinoParking")
-  val host = ConfigFactory.load().getString("daf-event-producers.hosts.torino")
 
   val att_name = "name"
   val att_status = "status"

@@ -41,17 +41,17 @@ class InfoBluEventConverter extends EventConverter {
       case Success(body) =>
         val res = Try {
           val featureCollection = JsonConverter.fromJson[FeatureCollection](body.mkString)
+          
           val avro = featureCollection
             .features
-            .map(convertEvent(_))
+            .flatMap(convertEvent(_).toOption)
             .filter { d =>
               time.get(url) match {
                 case None => true
                 case Some(t) => d.ts >= t
               }
-            }
-            .map(AvroConverter.convertEvent)
-            .toSeq
+            }.map(AvroConverter.convertEvent).toSeq
+
           avro match {
             case Nil =>
               logger.debug(s"No datapoint extracted at ${newMap(url)}")
@@ -79,9 +79,11 @@ class InfoBluEventConverter extends EventConverter {
     scala.io.Source.fromInputStream(reader).getLines().mkString
   }
 
-  private def convertEvent(feature: Feature): Event = {
+  private def convertEvent(feature: Feature): Try[Event] = Try {
 
-    val ts = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(feature.properties.start_time).getTime
+    val start_updated_time = Option(feature.properties.start_time).getOrElse(feature.properties.update_time)
+
+    val ts = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(start_updated_time).getTime
     val prefixId = s"${this.getClass.getName}."
 
     val tagList = List("type", "road_direction_name").mkString(",")
@@ -101,6 +103,10 @@ class InfoBluEventConverter extends EventConverter {
         "tags" -> tagList
       )
     )
+  } recoverWith {
+    case ex =>
+      logger.error(s"Exception in $feature ${ex.getMessage}")
+      Failure(ex)
   }
 
 }

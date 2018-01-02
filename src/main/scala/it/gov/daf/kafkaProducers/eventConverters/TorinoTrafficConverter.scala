@@ -126,6 +126,6 @@ object TorinoTrafficConverter {
   val att_speed = "speed"
   val measure = "opendata.torino.get_fdt"
   val url = ConfigFactory.load().getString("daf-event-producers.urls.torinoTraffic")
-  val host = ConfigFactory.load().getString("daf-event-producers.hosts.torino")
+  //val host = ConfigFactory.load().getString("daf-event-producers.hosts.torino")
 
 }
